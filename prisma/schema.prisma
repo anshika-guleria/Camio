@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  INTERVIEWER
+  RECRUITER
+}
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
+enum RoomStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum TemplateType {
+  CODING
+  WHITEBOARD
+  MIXED
+}
+
+enum RecordingStatus {
+  PROCESSING
+  READY
+  FAILED
+}
+
+model User {
+  id              String             @id @default(cuid())
+  email           String             @unique
+  name            String
+  avatarUrl       String?
+  status          UserStatus         @default(ACTIVE)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  memberships     OrganizationMember[]
+  ownedRooms      InterviewRoom[]    @relation("RoomOwner")
+  interviewerRooms RoomInterviewer[]
+  interviews      Interview[]        @relation("InterviewerInterviews")
+  feedback        Feedback[]
+  messages        ChatMessage[]
+  templates       Template[]
+}
+
+model Organization {
+  id          String               @id @default(cuid())
+  name        String
+  slug        String               @unique
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  members     OrganizationMember[]
+  rooms       InterviewRoom[]
+  templates   Template[]
+}
+
+model OrganizationMember {
+  id             String           @id @default(cuid())
+  role           OrganizationRole @default(INTERVIEWER)
+  userId         String
+  organizationId String
+  joinedAt       DateTime         @default(now())
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId, role])
+}
+
+model Candidate {
+  id          String       @id @default(cuid())
+  name        String
+  email       String
+  role        String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  interviews  Interview[]
+  rooms       InterviewRoom[]
+
+  @@index([email])
+}
+
+model InterviewRoom {
+  id             String              @id @default(cuid())
+  name           String
+  status         RoomStatus          @default(DRAFT)
+  organizationId String
+  ownerId        String
+  candidateId    String?
+  templateId     String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  owner          User                @relation("RoomOwner", fields: [ownerId], references: [id])
+  candidate      Candidate?          @relation(fields: [candidateId], references: [id], onDelete: SetNull)
+  template       Template?           @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  interviewers   RoomInterviewer[]
+  interviews     Interview[]
+  recordings     Recording[]
+  messages       ChatMessage[]
+  files          RoomFile[]
+
+  @@index([organizationId, status])
+  @@index([ownerId, createdAt])
+}
+
+model RoomInterviewer {
+  roomId       String
+  userId       String
+  joinedAt     DateTime?
+  room         InterviewRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, userId])
+}
+
+model Interview {
+  id            String          @id @default(cuid())
+  roomId        String
+  candidateId   String
+  interviewerId String?
+  status        InterviewStatus @default(SCHEDULED)
+  scheduledAt   DateTime?
+  startedAt     DateTime?
+  endedAt       DateTime?
+  createdAt     DateTime        @default(now())
+  room          InterviewRoom  @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  candidate     Candidate       @relation(fields: [candidateId], references: [id])
+  interviewer   User?           @relation("InterviewerInterviews", fields: [interviewerId], references: [id], onDelete: SetNull)
+  feedback      Feedback[]
+  recording     Recording?
+
+  @@index([roomId, status])
+  @@index([scheduledAt])
+}
+
+model Template {
+  id             String         @id @default(cuid())
+  name           String
+  type           TemplateType   @default(CODING)
+  description    String?
+  language       String?
+  durationMinutes Int?
+  organizationId String
+  createdById    String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy      User           @relation(fields: [createdById], references: [id])
+  rooms          InterviewRoom[]
+
+  @@index([organizationId, type])
+}
+
+model Recording {
+  id          String          @id @default(cuid())
+  roomId      String
+  interviewId String          @unique
+  status      RecordingStatus @default(PROCESSING)
+  storageUrl  String?
+  durationSec Int?
+  createdAt   DateTime        @default(now())
+  room        InterviewRoom   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  interview   Interview       @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+}
+
+model Feedback {
+  id            String     @id @default(cuid())
+  interviewId   String
+  reviewerId    String
+  score         Int?
+  recommendation String?
+  notes         String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  interview     Interview  @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  reviewer      User       @relation(fields: [reviewerId], references: [id])
+
+  @@unique([interviewId, reviewerId])
+}
+
+model ChatMessage {
+  id        String        @id @default(cuid())
+  roomId    String
+  authorId  String
+  body      String
+  createdAt DateTime      @default(now())
+  room      InterviewRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id])
+
+  @@index([roomId, createdAt])
+}
+
+model RoomFile {
+  id        String        @id @default(cuid())
+  roomId    String
+  name      String
+  mimeType  String?
+  sizeBytes Int?
+  storageUrl String
+  uploadedById String
+  createdAt DateTime      @default(now())
+  room      InterviewRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}

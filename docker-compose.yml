@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: camio-postgres
+    environment:
+      POSTGRES_USER: camio
+      POSTGRES_PASSWORD: camio
+      POSTGRES_DB: camio
+    ports:
+      - "5432:5432"
+    volumes:
+      - camio_pg:/var/lib/postgresql/data
+
+volumes:
+  camio_pg:

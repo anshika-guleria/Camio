@@ -1,26 +1,421 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* =========================================================
+   CAMIO DESIGN SYSTEM
+   Single source of truth. Dark is the default (:root).
+   Add `.light` to <html> to opt into light mode.
+========================================================= */
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ---- Surfaces ---- */
+  --background: #09090b;      /* rich black page bg */
+  --surface: #111114;         /* layered surface, one step up */
+  --surface-2: #17171b;       /* layered surface, two steps up */
+  --card: rgba(255, 255, 255, 0.045);   /* dark glass */
+  --card-hover: rgba(255, 255, 255, 0.07);
+  --card-foreground: #f4f4f5;
+
+  --popover: #17171b;
+  --popover-foreground: #f4f4f5;
+
+  /* ---- Typography ---- */
+  --foreground: #f4f4f5;
+  --muted: #1c1c20;
+  --muted-foreground: #9a9aa2;
+  --secondary: #1c1c20;
+  --secondary-foreground: #e4e4e7;
+
+  /* ---- Borders ---- */
+  --border: rgba(255, 255, 255, 0.1);
+  --border-hover: color-mix(in srgb, var(--primary) 55%, white 8%);
+  --input: rgba(255, 255, 255, 0.1);
+
+  /* ---- Accent (default = blue, overridden by [data-theme]) ---- */
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --primary-light: #60a5fa;
+  --primary-foreground: #ffffff;
+  --ring: var(--primary);
+
+  --accent: #1c1c20;
+  --accent-foreground: #f4f4f5;
+
+  /* ---- Status ---- */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  /* ---- Radius (16-20px per spec) ---- */
+  --radius: 18px;
+  --radius-sm: calc(var(--radius) * 0.55);   /* ~10px */
+  --radius-md: calc(var(--radius) * 0.8);    /* ~14px */
+  --radius-lg: var(--radius);                /* 18px */
+  --radius-xl: calc(var(--radius) * 1.3);    /* ~23px */
+  --radius-2xl: calc(var(--radius) * 1.7);   /* ~31px */
+
+  /* ---- Shadow ---- */
+  --shadow-sm: 0 6px 18px rgba(0, 0, 0, 0.25);
+  --shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
+
+  /* ---- Glow (auto-follows accent) ---- */
+  --glow:
+    0 0 12px color-mix(in srgb, var(--primary) 40%, transparent),
+    0 0 30px color-mix(in srgb, var(--primary) 15%, transparent);
+  --glow-strong:
+    0 0 20px color-mix(in srgb, var(--primary) 60%, transparent),
+    0 0 50px color-mix(in srgb, var(--primary) 25%, transparent);
+
+  /* ---- Charts (neutral scale, independent of accent) ---- */
+  --chart-1: #a1a1aa;
+  --chart-2: #71717a;
+  --chart-3: #52525b;
+  --chart-4: #3f3f46;
+  --chart-5: #27272a;
+
+  /* ---- Sidebar ---- */
+  --sidebar: var(--surface);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+
+  --transition: 0.25s ease;
 }
+
+/* =========================================================
+   LIGHT MODE (opt-in via <html class="light">)
+========================================================= */
+
+.light {
+  --background: #ffffff;
+  --surface: #f7f7f8;
+  --surface-2: #efeff1;
+  --card: #ffffff;
+  --card-hover: #f7f7f8;
+  --card-foreground: #18181b;
+
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+
+  --foreground: #18181b;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.16);
+  --input: rgba(0, 0, 0, 0.1);
+
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+
+  --chart-1: #52525b;
+  --chart-2: #71717a;
+  --chart-3: #a1a1aa;
+  --chart-4: #d4d4d8;
+  --chart-5: #e4e4e7;
+}
+
+/* =========================================================
+   ACCENT THEMES
+   Set via data-theme="..." on <html> or a wrapping element.
+========================================================= */
+
+[data-theme="blue"] {
+  --primary: #3b82f6; --primary-hover: #2563eb; --primary-light: #60a5fa; --logo-hue: 185deg;
+}
+[data-theme="purple"] {
+  --primary: #8b5cf6; --primary-hover: #7c3aed; --primary-light: #a78bfa; --logo-hue: 235deg;
+}
+[data-theme="pink"] {
+  --primary: #ec4899; --primary-hover: #db2777; --primary-light: #f472b6; --logo-hue: 295deg;
+}
+[data-theme="red"] {
+  --primary: #ef4444; --primary-hover: #dc2626; --primary-light: #f87171; --logo-hue: 325deg;
+}
+[data-theme="orange"] {
+  --primary: #f97316; --primary-hover: #ea580c; --primary-light: #fb923c; --logo-hue: 355deg;
+}
+[data-theme="yellow"] {
+  --primary: #eab308; --primary-hover: #ca8a04; --primary-light: #fde047; --logo-hue: 20deg;
+}
+[data-theme="green"] {
+  --primary: #22c55e; --primary-hover: #16a34a; --primary-light: #4ade80; --logo-hue: 85deg;
+}
+[data-theme="teal"] {
+  --primary: #14b8a6; --primary-hover: #0f766e; --primary-light: #5eead4; --logo-hue: 140deg;
+}
+[data-theme="cyan"] {
+  --primary: #06b6d4; --primary-hover: #0891b2; --primary-light: #67e8f9; --logo-hue: 155deg;
+}
+[data-theme="indigo"] {
+  --primary: #6366f1; --primary-hover: #4f46e5; --primary-light: #818cf8; --logo-hue: 205deg;
+}
+
+/* =========================================================
+   TAILWIND THEME MAPPING
+   Exposes every token above as a Tailwind color/radius utility
+   (bg-background, text-foreground, rounded-lg, ring-ring, etc.)
+========================================================= */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-sans);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =========================================================
+   BASE
+========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+html.light {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--background);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px);
+  background-size: 56px 56px, 56px 56px;
+  background-position: center, center;
+  transition: background var(--transition), color var(--transition);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1, h2, h3, h4 {
+    @apply tracking-tight;
+  }
+}
+
+/* =========================================================
+   SELECTION / SCROLLBAR / FOCUS
+========================================================= */
+
+::selection {
+  background: var(--primary);
+  color: white;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+}
+
+*:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--primary);
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: var(--glow); }
+  50% { box-shadow: var(--glow-strong); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.camio-logo-mark {
+  display: block;
+  width: auto;
+  object-fit: contain;
+  filter: grayscale(1) sepia(1) saturate(7) hue-rotate(var(--logo-hue, 0deg)) contrast(1.06);
+  transition: filter var(--transition), transform var(--transition);
+}
+
+.glass {
+  background: color-mix(in srgb, var(--card) 96%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), var(--shadow-sm);
+}
+
+.glow {
+  box-shadow: var(--glow);
+}
+
+.glow-hover {
+  transition: box-shadow var(--transition);
+}
+.glow-hover:hover {
+  box-shadow: var(--glow);
+}
+
+.glow-pulse {
+  animation: pulseGlow 2.5s infinite;
+}
+
+.gradient-text {
+  background: linear-gradient(100deg, var(--foreground) 0%, var(--primary-light) 72%, var(--primary) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.section-gradient {
+  position: relative;
+  isolation: isolate;
+}
+
+.section-gradient::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: -1;
+  width: min(72%, 58rem);
+  height: 16rem;
+  pointer-events: none;
+  content: "";
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center top, color-mix(in srgb, var(--primary) 13%, transparent), transparent 68%);
+  opacity: 0.8;
+}
+
+.gradient-surface {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 9%, var(--background)), var(--background) 58%, color-mix(in srgb, var(--primary-light) 4%, var(--background)));
+}
+
+.hover-lift {
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), var(--shadow-sm);
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+.card:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), var(--shadow), var(--glow);
+}
+
+.page-canvas {
+  position: relative;
+  isolation: isolate;
+}
+
+.page-canvas::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  background: transparent;
 }
